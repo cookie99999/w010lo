@@ -1,0 +1,25 @@
+*.bin
+*.o
+*.elf
+*.lst
+*~
+
+# kicad stuff
+*backups
+*.lck
+fp-info-cache
+*auto_saved_files*
+
+# wincupl junk
+*.log
+*.pla
+*.jed
+*.sim
+*.so
+*.wo
+*.si
+*.pdf
+*.abs
+*.doc
+*.wcp
+*.im

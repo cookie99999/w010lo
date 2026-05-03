@@ -1,0 +1,37 @@
+Name       w010proto.pld;
+Partno     ;
+Date       ;
+Revision   ;
+Designer   ;
+Company    ;
+Assembly   ;
+Location   ;
+Device     P22V10;
+
+Pin 2 = RW;
+Pin 3 = UDS;
+Pin 4 = AS;
+Pin 5 = REROM;
+Pin 6 = DTACK_IN;
+Pin 7 = A23;
+Pin 8 = A20;
+Pin 9 = LDS;
+Pin 10 = INT;
+
+Pin 23 = RD;
+Pin 22 = WR;
+Pin 21 = DTACK_OUT;
+Pin 20 = LROMCS;
+Pin 19 = UROMCS;
+Pin 18 = LRAMCS;
+Pin 17 = URAMCS;
+Pin 16 = DUARTCS;
+
+RD = !RW & (!LDS # !UDS);
+WR = RW & (!LDS # !UDS);
+!DTACK_OUT = (!LROMCS # !UROMCS # !LRAMCS # !URAMCS) # !DTACK_IN;
+!LROMCS = ((!REROM # A23) & !AS) & INT & !LDS;
+!UROMCS = ((!REROM # A23) & !AS) & INT & !UDS;
+!LRAMCS = ((REROM & !A23 & !A20) & !AS) & INT & !LDS;
+!URAMCS = ((REROM & !A23 & !A20) & !AS) & INT & !UDS;
+!DUARTCS = !A23 & A20 & !AS & !LDS & INT;
