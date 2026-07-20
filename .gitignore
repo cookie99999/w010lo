@@ -10,6 +10,7 @@
 *.kicad_prl
 fp-info-cache
 *auto_saved_files*
+kicad/gerber
 
 # wincupl junk
 *.log
