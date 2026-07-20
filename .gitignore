@@ -7,6 +7,7 @@
 # kicad stuff
 *backups
 *.lck
+*.kicad_prl
 fp-info-cache
 *auto_saved_files*
 
