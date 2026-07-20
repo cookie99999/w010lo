@@ -57,7 +57,7 @@ vectors:
   dc.l chk_trap ; chk
   dc.l generic_trap ; trapv
   dc.l generic_trap ; privilege violation
-  dc.l generic_trap ; trace
+  dc.l trace_trap ; trace
   dc.l generic_trap ; line 1010
   dc.l generic_trap ; line 1111
   dc.l reserved_trap ; res
@@ -106,6 +106,8 @@ copyvecs:
   dbra d0, .loop
   lea timer_handler, a0
   move.l a0, $000100
+  lea trap0_handler, a0
+  move.l a0, $000080
   move.w #$2000, sr ; int level 0 (duart is 4)
 
   lea str_ready, a0
@@ -186,6 +188,8 @@ parseline:
   beq do_poke
   cmp.b #'G', d0
   beq do_run
+  cmp.b #'U', d0
+  beq do_dbg
   cmp.b #'.', d0
   bne .skiprange
   exg a1, a2
@@ -254,6 +258,11 @@ peek_range: ; a1 start, a2 end
   rts
 
 do_run:
+  jsr (a1)
+  rts
+
+do_dbg:
+  ori.w #$8000, sr ; trace on
   jsr (a1)
   rts
 
@@ -366,6 +375,17 @@ prlong:	; print d0
   jsr prbyte
   rol.l #8, d0
   jsr prbyte
+  rol.l #8, d0
+  jsr prbyte
+  rol.l #8, d0
+  jsr prbyte
+  move.l (sp)+, d0
+  rts
+
+prword:	; print d0.w
+  move.l d0, -(sp)
+  rol.l #8, d0
+  rol.l #8, d0
   rol.l #8, d0
   jsr prbyte
   rol.l #8, d0
@@ -561,12 +581,22 @@ addr_trap:
   rte
 
 illegal_instr_trap:
-  movem.l a0/d0, -(sp)
+  movem.l a0/d0/d1, -(sp)
   lea str_exception, a0
   jsr puts
   lea str_exc_ill, a0
   jsr puts
-  movem.l (sp)+, a0/d0
+  move.l 14(sp), d0
+  movea.l d0, a0
+  move.l (a0), d1
+  jsr prlong
+  move.b #':', d0
+  jsr putchar
+  move.b #' ', d0
+  jsr putchar
+  exg d0, d1
+  jsr prlong
+  movem.l (sp)+, a0/d0/d1
   rte
 
 uninit_vec_trap:
@@ -595,6 +625,10 @@ chk_trap:
   jsr puts
   movem.l (sp)+, a0/d0
   rte
+
+trace_trap:
+  movem.l d0-d7/a0-a7, -(sp)
+  jmp debug_entry
 
 reserved_trap:
   movem.l a0/d0, -(sp)
@@ -653,6 +687,14 @@ timer_handler:
   movem.l (sp)+, d0/a0
   rte
 
+trap0_handler: ; soft reset
+  movea.l #$000ffffe, sp
+  move.b #CR, d0
+  jsr putchar
+  move.b #LF, d0
+  jsr putchar
+  jmp ready
+
 str_ready:
   dc.b "Ready", CR, LF, $00
 str_xmodem_start:
@@ -688,9 +730,115 @@ str_exc_auto:
 str_exc_spurious:
   dc.b "Spurious IRQ", CR, LF, $00
 
-  ;dcb.b $c0500-*, $ff
-  
-  ;org $c0500
-  ;incbin ctest.bin
+  ;-------------------------
+  ; debugger
+  ;-------------------------
 
+  align 2
+debug_entry:
+  ; stack frame: $00-$3f d0-d7/a0-a7
+  ; $00 d0 $04 d1 $08 d2 $0c d3
+  ; $10 d4 $14 d5 $18 d6 $1c d7
+  ; $20 a0 $24 a1 $28 a2 $2c a3
+  ; $30 a4 $34 a5 $38 a6 $3c a7
+  ; $40 sr $42 pc $46 fmt + vector
+  move.l $42(sp), d0
+  jsr prlong
+  move.b #':', d0
+  jsr putchar
+  move.b #' ', d0
+  jsr putchar
+  movea.l $42(sp), a0
+  move.l (a0), d0
+  jsr prlong
+.prompt:
+  move.b #CR, d0
+  jsr putchar
+  move.b #LF, d0
+  jsr putchar
+  move.b #'*', d0
+  jsr putchar
+  jsr getchar_b
+  cmp.b #'n', d0
+  beq .next
+  cmp.b #'q', d0
+  beq .quit
+  cmp.b #'d', d0
+  bne .prompt
+.regdump:
+  movea.l sp, a0
+  move.l a0, d1
+  addi.l #$20, d1
+  movea.l d1, a1
+  move.w #7, d1
+  move.b #$30, d2
+.loop:
+  move.b #'d', d0
+  jsr putchar
+  move.b d2, d0
+  jsr putchar
+  move.b #' ', d0
+  jsr putchar
+  move.l (a0)+, d0
+  jsr prlong
+  move.b #9, d0 ; htab
+  jsr putchar
+  move.b #'a', d0
+  jsr putchar
+  move.b d2, d0
+  jsr putchar
+  move.b #' ', d0
+  jsr putchar
+  move.l (a1)+, d0
+  jsr prlong
+  move.b #CR, d0
+  jsr putchar
+  move.b #LF, d0
+  jsr putchar
+  addq.b #1, d2
+  dbra d1, .loop
+  move.b #'s', d0
+  jsr putchar
+  move.b #'r', d0
+  jsr putchar
+  move.b #' ', d0
+  jsr putchar
+  move.w $40(sp), d0
+  jsr prword
+  move.b #9, d0 ; htab
+  jsr putchar
+  move.b #'p', d0
+  jsr putchar
+  move.b #'c', d0
+  jsr putchar
+  move.b #' ', d0
+  jsr putchar
+  move.l $42(sp), d0
+  jsr prlong
+  move.b #9, d0 ; htab
+  jsr putchar
+  move.b #'u', d0
+  jsr putchar
+  move.b #'s', d0
+  jsr putchar
+  move.b #'p', d0
+  jsr putchar
+  move.b #' ', d0
+  jsr putchar
+  move.l usp, a2
+  move.l a2, d0
+  jsr prlong
+  move.b #CR, d0
+  jsr putchar
+  move.b #LF, d0
+  jsr putchar
+  bra .prompt
+.next:
+  movem.l (sp)+, d0-d7/a0-a7
+  rte
+.quit:
+  andi.w #$7fff, $40(sp) ; no more trace after rte
+  movem.l (sp)+, d0-d7/a0-a7
+  rte
+  
   dcb.b $840000-*, $ff
