@@ -1,0 +1,35 @@
+96 Pin 3x32 DIN 41612
+A       | B      | C
+--------------------------
+D0      | NC     | D8
+D1      | NC     | D9
+D2      | NC     | D10
+D3      | NC     | D11
+D4      | NC     | D12
+D5      | NC     | D13
+D6      | NC     | D14
+D7      | NC     | D15
+GND     | NC     | GND
+CLK     | NC     | NC
+GND     | NC     | !BERR
+!UDS    | NC     | !RESET
+!LDS    | NC     | NC
+R/!W    | NC     | NC
+GND     | NC     | A23
+!DTACK  | GND    | A22
+GND     | !VMA   | A21
+!AS     | E      | A20
+GND     | !VPA   | A19
+!IACK   | GND    | A18
+!IACKIN | NC     | A17
+!IACKOUT| NC     | A16
+NC      | GND    | A15
+A7      | !IRQ7  | A14
+A6      | !IRQ6  | A13
+A5      | !IRQ5  | A12
+A4      | !IRQ4  | A11
+A3      | !IRQ3  | A10
+A2      | !IRQ2  | A9
+A1      | !IRQ1  | A8
+NC      | +5V    | NC
++5V     | +5V    | +5V

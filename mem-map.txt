@@ -1,0 +1,3 @@
+rom 80.0000-ff.ffff
+ram 00.0000-0f.ffff
+duart 10.0000-1f.ffff mirrored every 10.0000 bytes until 80.0000
