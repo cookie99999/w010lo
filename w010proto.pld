@@ -17,6 +17,7 @@ Pin 7 = A23;
 Pin 8 = A20;
 Pin 9 = LDS;
 Pin 10 = INT;
+Pin 11 = A19;
 
 Pin 23 = RD;
 Pin 22 = WR;
@@ -26,12 +27,14 @@ Pin 19 = UROMCS;
 Pin 18 = LRAMCS;
 Pin 17 = URAMCS;
 Pin 16 = DUARTCS;
+Pin 15 = ATACS;
 
 RD = !RW & (!LDS # !UDS);
 WR = RW & (!LDS # !UDS);
-!DTACK_OUT = (!LROMCS # !UROMCS # !LRAMCS # !URAMCS) # !DTACK_IN;
+!DTACK_OUT = (!LROMCS # !UROMCS # !LRAMCS # !URAMCS # !ATACS) # !DTACK_IN;
 !LROMCS = ((!REROM # A23) & !AS) & INT & !LDS;
 !UROMCS = ((!REROM # A23) & !AS) & INT & !UDS;
 !LRAMCS = ((REROM & !A23 & !A20) & !AS) & INT & !LDS;
 !URAMCS = ((REROM & !A23 & !A20) & !AS) & INT & !UDS;
-!DUARTCS = !A23 & A20 & !AS & !LDS & INT;
+!DUARTCS = !A23 & A20 & !A19 & !AS & !LDS & INT;
+!ATACS = !A23 & A20 & A19 & !AS & !LDS & INT;
