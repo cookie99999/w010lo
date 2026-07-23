@@ -39,27 +39,27 @@ CF_WRITE_SEC equ $30
   jsr cf_drq_wait
 
   move.l #(512/2)-1, d1
-  movea.l #$020000, a1
+  movea.l #$030000, a1
 .read:
   move.w CF_DATA, (a1)+
   jsr cf_busy_wait
   dbra d1, .read
 
-  move.b #$01, CF_FEATURE
-  move.b #$ef, CF_CMD
-  jsr cf_busy_wait
-  move.b CF_ERR, $030000
+  ;move.b #$01, CF_FEATURE
+  ;move.b #$ef, CF_CMD
+  ;jsr cf_busy_wait
+  ;move.b CF_ERR, $030000
 
   movea.l #$020000, a0
   move.l #$2bf, d0
-  jsr cf_read_sector_8
+  jsr cf_read_sector
 
   move.b #'X', $020000
   move.b #'Q', $020043
 
   movea.l #$020000, a0
   move.l #$2bf, d0
-  jsr cf_write_sector_8
+  jsr cf_write_sector
 
   rts
 
@@ -86,8 +86,8 @@ cf_read_sector:
   movep.l d0, CF_LBA_7_0-CF_BASE(a1)
   move.b #1, CF_SEC_COUNT
   move.b #CF_READ_SEC, CF_CMD
-  jsr cf_busy_wait
   jsr cf_drq_wait
+  jsr cf_busy_wait
   move.l #(512/2)-1, d1 ; moving words, dbra quits at negative
 .readloop:
   move.w CF_DATA, d0
@@ -109,8 +109,8 @@ cf_read_sector_8:
   movep.l d0, CF_LBA_7_0-CF_BASE(a1)
   move.b #1, CF_SEC_COUNT
   move.b #CF_READ_SEC, CF_CMD
-  jsr cf_busy_wait
   jsr cf_drq_wait
+  jsr cf_busy_wait
   move.l #512-1, d1 ; dbra quits at negative
 .readloop:
   move.b CF_DATA+1, (a0)+ ; need lds asserted for cs so read from odd
@@ -132,8 +132,8 @@ cf_write_sector:
   movep.l d0, CF_LBA_7_0-CF_BASE(a1)
   move.b #1, CF_SEC_COUNT
   move.b #CF_WRITE_SEC, CF_CMD
-  jsr cf_busy_wait
   jsr cf_drq_wait
+  jsr cf_busy_wait
   move.l #(512/2)-1, d1 ; moving words, dbra quits at negative
 .writeloop:
   move.w (a0)+, d0
@@ -156,8 +156,8 @@ cf_write_sector_8:
   movep.l d0, CF_LBA_7_0-CF_BASE(a1)
   move.b #1, CF_SEC_COUNT
   move.b #CF_WRITE_SEC, CF_CMD
-  jsr cf_busy_wait
   jsr cf_drq_wait
+  jsr cf_busy_wait
   move.l #512-1, d1 ; dbra quits at negative
 .writeloop:
   move.b (a0)+, CF_DATA+1

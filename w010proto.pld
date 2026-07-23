@@ -27,14 +27,18 @@ Pin 19 = UROMCS;
 Pin 18 = LRAMCS;
 Pin 17 = URAMCS;
 Pin 16 = DUARTCS;
-Pin 15 = ATACS;
+Pin 15 = ATARD;
+Pin 14 = ATAWR;
+
+ATA = !A23 & A20 & A19;
 
 RD = !RW & (!LDS # !UDS);
 WR = RW & (!LDS # !UDS);
-!DTACK_OUT = (!LROMCS # !UROMCS # !LRAMCS # !URAMCS # !ATACS) # !DTACK_IN;
+!DTACK_OUT = (!LROMCS # !UROMCS # !LRAMCS # !URAMCS # !ATARD # !ATAWR) # !DTACK_IN;
 !LROMCS = ((!REROM # A23) & !AS) & INT & !LDS;
 !UROMCS = ((!REROM # A23) & !AS) & INT & !UDS;
 !LRAMCS = ((REROM & !A23 & !A20) & !AS) & INT & !LDS;
 !URAMCS = ((REROM & !A23 & !A20) & !AS) & INT & !UDS;
 !DUARTCS = !A23 & A20 & !A19 & !AS & !LDS & INT;
-!ATACS = !A23 & A20 & A19 & !AS & !LDS & INT;
+!ATARD = ATA & !AS & !RD & INT;
+!ATAWR = ATA & !AS & !WR & INT;
