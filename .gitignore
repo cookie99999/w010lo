@@ -8,6 +8,8 @@
 *backups
 *.lck
 *.kicad_prl
+*.zip
+*gbr
 fp-info-cache
 *auto_saved_files*
 kicad/gerber
