@@ -1,4 +1,16 @@
+prototype:
 rom 80.0000-ff.ffff
 ram 00.0000-0f.ffff
 duart 10.0000-17.ffff w/ mirroring
 ata 18.0000-1f.ffff w/ mirroring
+
+new:
+4.0000 of rom fc.0000-ff.ffff a23..a17 = 1111.110-1111.111
+10.0000 of ram 00.0000-0f.ffff a23..a17 = 0000.000-0000.111
+ram expansion 10.0000-f7.ffff a23..17 = 0001.000-1111.011
+f8.0000-f9.ffff (1111.100) open so berr timeout can calculate installed ram
+
+io space fa.0000-fb.ffff a23..a17 = 1111.101-1111.101
+rtc fa.0000-fa.0fff (2k sram, only lower byte accesses allowed)
+duart fa.1000-fa.1fff w/ mirroring
+ata fa.2000-fa.2fff w/ mirroring

@@ -1,0 +1,43 @@
+Name       w010lo-io.pld;
+Partno     ;
+Date       ;
+Revision   ;
+Designer   ;
+Company    ;
+Assembly   ;
+Location   ;
+Device     P22V10;
+
+Pin 1 = A12;
+Pin 2 = A13;
+Pin 3 = A1;
+Pin 4 = A2;
+Pin 5 = A3;
+Pin 6 = IACKIN;
+Pin 7 = AS;
+Pin 8 = RW;
+Pin 9 = LDS;
+Pin 10 = UDS;
+Pin 11 = IO;
+
+Pin 14 = ATAWR;
+Pin 15 = ATARD;
+Pin 16 = DTACK;
+Pin 17 = VPA;
+Pin 18 = WR;
+Pin 19 = RD;
+Pin 20 = RTCCS;
+Pin 21 = DUARTIACK;
+Pin 22 = DUARTCS;
+Pin 23 = IACKOUT;
+
+RD = !RW & (!LDS # !UDS);
+WR = RW & (!LDS # !UDS);
+!ATARD = !IO & A13 & !A12 & !AS & !RD;
+!ATAWR = !IO & A13 & !A12 & !AS & !WR;
+!DUARTCS = !IO & !A13 & A12 & !LDS;
+!RTCCS = !IO & !A13 & !A12 & !LDS;
+!DTACK = !RTCCS # !ATARD # !ATAWR;
+!DUARTIACK = !IACKIN & A3 & !A2 & A1;
+!VPA = !IACKIN & !A3 & A2 & A1;
+!IACKOUT = VPA & DUARTIACK;

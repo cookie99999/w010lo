@@ -1,0 +1,19 @@
+Name       w010lo-cpu.pld;
+Partno     ;
+Date       ;
+Revision   ;
+Designer   ;
+Company    ;
+Assembly   ;
+Location   ;
+Device     G16V8;
+
+Pin 1 = FC0;
+Pin 2 = FC1;
+Pin 3 = FC2;
+Pin 4 = AS;
+Pin 5 = A23;
+
+Pin 12 = IACK;
+
+!IACK = (FC0 & FC1 & FC2) & !AS & A23;

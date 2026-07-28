@@ -1,0 +1,41 @@
+Name       w010lo-mem.pld;
+Partno     ;
+Date       ;
+Revision   ;
+Designer   ;
+Company    ;
+Assembly   ;
+Location   ;
+Device     P22V10;
+
+Pin 1 = IACKIN;
+Pin 2 = AS;
+Pin [3..9] = [A17..A23];
+Pin 13 = REROM;
+Pin 11 = UDS;
+Pin 17 = LDS;
+Pin 18 = RW;
+
+Pin 14 = RD;
+Pin 15 = WR;
+Pin 16 = IOSEL;
+Pin 19 = DTACK;
+Pin 20 = LROMCS;
+Pin 21 = UROMCS;
+Pin 22 = LRAMCS;
+Pin 23 = URAMCS;
+
+FIELD Address = [A23..A17];
+
+ROM = Address:[fc0000..ffffff];
+RAM = Address:[000000..0fffff];
+IO = Address:[f80000..f9ffff];
+
+RD = !RW & (!LDS # !UDS);
+WR = RW & (!LDS # !UDS);
+!DTACK = !URAMCS # !LRAMCS # !UROMCS # !LROMCS;
+!LROMCS = ((!REROM # ROM) & !AS) & IACKIN & !LDS;
+!UROMCS = ((!REROM # ROM) & !AS) & IACKIN & !UDS;
+!LRAMCS = ((REROM & RAM) & !AS) & IACKIN & !LDS;
+!URAMCS = ((REROM & RAM) & !AS) & IACKIN & !UDS;
+!IOSEL = IO;
