@@ -6212,10 +6212,6 @@
 		(uuid "9bae20ac-59de-4f08-b2e1-65d1427faa05")
 	)
 	(no_connect
-		(at 49.53 73.66)
-		(uuid "b5355e02-1ba2-4994-af22-71ea856e9f15")
-	)
-	(no_connect
 		(at 96.52 151.13)
 		(uuid "b89ae8c5-96d6-499d-a66f-fe19c8ff6be6")
 	)
@@ -6226,6 +6222,10 @@
 	(no_connect
 		(at 133.35 173.99)
 		(uuid "cdfa4cf7-f9ec-49a5-ae15-952eeab3f405")
+	)
+	(no_connect
+		(at 49.53 71.12)
+		(uuid "dbff1fcb-1cdc-4602-9861-460b88af8a63")
 	)
 	(no_connect
 		(at 60.96 173.99)
@@ -11479,30 +11479,6 @@
 		)
 		(uuid "ffb957d4-16a4-4a1c-ae8f-b4c32f62e091")
 	)
-	(global_label "~{REROM}"
-		(shape output)
-		(at 49.53 71.12 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "07de74bf-96a2-48bb-b3d3-94b2a4732ae8")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 58.9861 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-	)
 	(global_label "D[0..7]"
 		(shape tri_state)
 		(at 273.05 24.13 0)
@@ -12500,6 +12476,30 @@
 		(uuid "b82898d8-2d71-4eee-97d9-a81d7a5a4d27")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 208.748 24.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "~{REROM}"
+		(shape output)
+		(at 49.53 73.66 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "bb6cbac2-7bbf-477e-bfb4-3822d1e184a5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 58.9861 73.66 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)

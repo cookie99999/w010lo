@@ -2,7 +2,7 @@
   section code,code
   org $000800
 
-CF_BASE equ $180000
+CF_BASE equ $fa2000
 
 CF_DATA equ CF_BASE+0
 CF_ERR equ CF_BASE+3
@@ -50,17 +50,18 @@ CF_WRITE_SEC equ $30
   ;jsr cf_busy_wait
   ;move.b CF_ERR, $030000
 
+  move.w #$2000, sr
   movea.l #$020000, a0
-  move.l #$2bf, d0
+  move.l #$a80, d0
   jsr cf_read_sector
 
   move.b #'X', $020000
-  move.b #'Q', $020043
+  move.b #'Q', $020024
 
   movea.l #$020000, a0
-  move.l #$2bf, d0
+  move.l #$a80, d0
   jsr cf_write_sector
-
+  move.w #$2400, sr
   rts
 
 cf_busy_wait:

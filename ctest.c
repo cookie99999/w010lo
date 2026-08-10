@@ -28,9 +28,9 @@ volatile unsigned char *linebuf = (volatile unsigned char*)0x000400;
 unsigned char asc2byte(char hi, char lo);
 
 void putch(char c) {
-  asm volatile ("1: btst.b #2, 0x100003\n"
+  asm volatile ("1: btst.b #2, 0xfa1013\n"
 		"beq 1b\n"
-		"move.b %0, 0x100007"
+		"move.b %0, 0xfa1017"
 		:
 		:"r"(c)
 		:"%d0");
@@ -45,9 +45,9 @@ void putstr(const char * s) {
 
 char getchar_b() {
   char c;
-  asm volatile ("1: btst.b #0, 0x100003\n"
+  asm volatile ("1: btst.b #0, 0xfa1013\n"
 		"beq 1b\n"
-		"move.b 0x100007, %%d0\n"
+		"move.b 0xfa1017, %%d0\n"
 		"move.b %%d0, %0"
 		:"=r"(c)
 		:

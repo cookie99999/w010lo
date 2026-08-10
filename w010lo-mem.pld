@@ -29,7 +29,7 @@ FIELD Address = [A23..A17];
 
 ROM = Address:[fc0000..ffffff];
 RAM = Address:[000000..0fffff];
-IO = Address:[f80000..f9ffff];
+IO = Address:[fa0000..fbffff];
 
 RD = !RW & (!LDS # !UDS);
 WR = RW & (!LDS # !UDS);

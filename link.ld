@@ -26,4 +26,7 @@ SECTIONS
   .bss : {
     *(.bss)
   } > RAM
+
+  . = ALIGN(2);
+  __end = .;
 }

@@ -7861,6 +7861,16 @@
 			(embedded_fonts no)
 		)
 	)
+	(text "Note: BERR watchdog still doesn't\nwork for some reason"
+		(exclude_from_sim no)
+		(at 260.604 94.742 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "6b80f4e7-4653-4991-aadc-5027178eeb01")
+	)
 	(junction
 		(at 135.89 120.65)
 		(diameter 0)
@@ -8144,10 +8154,6 @@
 	(no_connect
 		(at 168.91 88.9)
 		(uuid "c2109307-cc9d-47c8-a58d-ceba54725ba1")
-	)
-	(no_connect
-		(at 64.77 142.24)
-		(uuid "d8145e45-ba08-4011-81b6-0ec447d3d2d6")
 	)
 	(no_connect
 		(at 76.2 53.34)
@@ -9591,16 +9597,6 @@
 			(type default)
 		)
 		(uuid "60a86039-a5f6-4a9c-862b-845eeaea457a")
-	)
-	(wire
-		(pts
-			(xy 114.3 149.86) (xy 123.19 149.86)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "60bcdb79-00e7-43d9-a3ba-31e9207d8d96")
 	)
 	(wire
 		(pts
@@ -12095,6 +12091,30 @@
 		(uuid "0c4931d4-bf4f-42f7-853a-64bea26baaac")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 143.3067 88.9 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "~{BERR}"
+		(shape input)
+		(at 64.77 142.24 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "0e2d5425-396c-4682-b81c-14f615c86990")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 64.77 150.1842 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16186,85 +16206,6 @@
 		)
 	)
 	(symbol
-		(lib_id "power:VCC")
-		(at 106.68 149.86 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "3e7d630a-e3b0-4f98-ac29-992372443ca1")
-		(property "Reference" "#PWR015"
-			(at 106.68 153.67 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "VCC"
-			(at 106.68 144.78 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 106.68 149.86 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 106.68 149.86 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"VCC\""
-			(at 106.68 149.86 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "f68e1db0-b4b4-4127-99bf-a3a95aee5807")
-		)
-		(instances
-			(project "w010lo-cpu"
-				(path "/68f828d6-ef83-483f-8bdd-42ff7eb0604d"
-					(reference "#PWR015")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:GND")
 		(at 26.67 68.58 0)
 		(unit 1)
@@ -16616,6 +16557,85 @@
 			(project "w010lo-cpu"
 				(path "/68f828d6-ef83-483f-8bdd-42ff7eb0604d"
 					(reference "#PWR038")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 123.19 149.86 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5913f165-f0dd-465c-8da0-e19949b040b5")
+		(property "Reference" "#PWR015"
+			(at 123.19 156.21 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 123.19 154.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 123.19 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 123.19 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 123.19 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "0c90dc3f-5076-4fd3-b5ea-1bcee3e9b55a")
+		)
+		(instances
+			(project "w010lo-cpu"
+				(path "/68f828d6-ef83-483f-8bdd-42ff7eb0604d"
+					(reference "#PWR015")
 					(unit 1)
 				)
 			)
@@ -18624,86 +18644,6 @@
 			(project "w010lo-cpu"
 				(path "/68f828d6-ef83-483f-8bdd-42ff7eb0604d"
 					(reference "#PWR042")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 110.49 149.86 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "a7bf4f84-76ee-49db-8508-86e870d6c97a")
-		(property "Reference" "R3"
-			(at 110.49 143.51 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "4.7k"
-			(at 110.49 146.05 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal"
-			(at 110.49 151.638 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 110.49 149.86 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 110.49 149.86 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "262f8eac-281e-4afe-873d-210127bb43fa")
-		)
-		(pin "2"
-			(uuid "1df0fabf-83bd-4c17-94dc-ff57d29340c9")
-		)
-		(instances
-			(project "w010lo-cpu"
-				(path "/68f828d6-ef83-483f-8bdd-42ff7eb0604d"
-					(reference "R3")
 					(unit 1)
 				)
 			)

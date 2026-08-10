@@ -3,7 +3,7 @@
   ; duart 00100000-007fffff
   ; rom 00800000-ffffffff
 
-DUART_BASE equ $100001
+DUART_BASE equ $00fa1001
 DUART_MR1A equ DUART_BASE
 DUART_MR2A equ DUART_BASE
 DUART_SRA equ DUART_BASE+2
@@ -45,7 +45,7 @@ secs equ $0601
 mins equ $0602
 hrs equ $0603
   section code, code
-  org $800000
+  org $00fc0000
   
 vectors:
   dc.l $000ffffe ; ssp at reset
@@ -86,15 +86,15 @@ vectors:
   
 _start:	
   move.b #$70, DUART_ACR ; baud rate set 1, ext /16 no ip irq
-  move.b #$cc, DUART_CSRA ; 38.4k
-  move.b #$13, DUART_MR1A ; 8n
-  move.b #$03, DUART_MR2A ; 1 stop
+  move.b #$cc, DUART_CSRB ; 38.4k
+  move.b #$13, DUART_MR1B ; 8n
+  move.b #$07, DUART_MR2B ; 1 stop
   move.b #$02, DUART_CTUR
   move.b #$3d, DUART_CTLR ; ~100hz
   move.b #$40, DUART_IVR
   move.b #$08, DUART_IMR ; timer irq enable
   move.b DUART_START_CTR, d0 ; read-activated, no value returned
-  move.b #$05, DUART_CRA ; enable tx and rx
+  move.b #$05, DUART_CRB ; enable tx and rx
   move.l #$00000000, jifs
 
 copyvecs:
@@ -108,7 +108,7 @@ copyvecs:
   move.l a0, $000100
   lea trap0_handler, a0
   move.l a0, $000080
-  move.w #$2000, sr ; int level 0 (duart is 4)
+  move.w #$2400, sr ; int level 0 (duart is 5)
 
   lea str_ready, a0
   bsr puts
@@ -335,9 +335,9 @@ asc2byte: ; most significant d0 least d1
   rts
   
 putchar: ; char in d0
-  btst.b #2, DUART_SRA
+  btst.b #2, DUART_SRB
   beq putchar
-  move.b d0, DUART_TBA
+  move.b d0, DUART_TBB
   rts
 
 puts: ; ptr to null terminated str in a0
@@ -394,9 +394,9 @@ prword:	; print d0.w
   rts
   
 getchar_b: ; char in d0, blocking
-  btst.b #0, DUART_SRA
+  btst.b #0, DUART_SRB
   beq getchar_b
-  move.b DUART_RBA, d0
+  move.b DUART_RBB, d0
   rts
 
 getchar_timeout: ; carry set if no char after ~1s
@@ -404,7 +404,7 @@ getchar_timeout: ; carry set if no char after ~1s
   move.b jifs, d0
   move.b secs, d1
 .loop:
-  btst.b #0, DUART_SRA
+  btst.b #0, DUART_SRB
   bne .break
   cmp.b secs, d1
   beq .loop
@@ -414,7 +414,7 @@ getchar_timeout: ; carry set if no char after ~1s
   ori.b #1, ccr
   rts
 .break:
-  move.b DUART_RBA, d0
+  move.b DUART_RBB, d0
   move.l (sp)+, d1
   andi.b #$fe, ccr
   rts
@@ -841,4 +841,4 @@ debug_entry:
   movem.l (sp)+, d0-d7/a0-a7
   rte
   
-  dcb.b $840000-*, $ff
+  dcb.b $01000000-*, $ff

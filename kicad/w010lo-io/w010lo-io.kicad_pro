@@ -545,6 +545,7 @@
       "netlist": "",
       "plot": "./io-r0-gbr",
       "specctra_dsn": "",
+      "step": "",
       "vrml": ""
     },
     "page_layout_descr_file": ""

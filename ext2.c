@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stddef.h>
 
 #define MEM_READB(x) (*((volatile uint8_t *)x))
 #define MEM_WRITEB(x, y) ((*((volatile uint8_t *)x)) = y)
@@ -31,7 +32,7 @@
 #define MFP_TSR MFP_BASE+45
 #define MFP_UDR MFP_BASE+47
 
-#define CF_BASE 0x180000
+#define CF_BASE 0xfa2000
 //registers
 #define CF_DATA CF_BASE+0
 #define CF_ERR CF_BASE+3
@@ -62,10 +63,26 @@
 #define CF_READ_SEC 0x20
 #define CF_WRITE_SEC 0x30
 
+#define MEMSZ 0x100000
+#define KSTACKSZ 0x10000
+#define MEMTOP (MEMSZ - KSTACKSZ)
+extern uint8_t __end;
+
+#define NHOLE 128
+struct hole {
+  uint8_t *begin;
+  uint32_t size;
+  struct hole *next;
+  struct hole *prev;
+};
+struct hole holes[NHOLE];
+struct hole *hole_head;
+struct hole *free_head;
+
 void putch(char c) {
-  asm volatile ("1: btst.b #2, 0x100003\n"
+  asm volatile ("1: btst.b #2, 0xfa1013\n"
 		"beq 1b\n"
-		"move.b %0, 0x100007"
+		"move.b %0, 0xfa1017"
 		:
 		:"r"(c)
 		:"%d0");
@@ -280,9 +297,131 @@ uint32_t find_name(uint8_t *buf, char *name) {
   }
   return 0;
 }
+
+void init_mem() {
+  for (struct hole *h = &holes[0]; h < &holes[NHOLE]; h++) {
+    h->next = h + 1;
+    h->prev = h - 1;
+  }
+  holes[0].next = NULL;
+  holes[0].prev = NULL;
+  holes[0].size = MEMTOP - (uint32_t)&__end;
+  holes[0].begin = (uint8_t*)&__end;
+  hole_head = &holes[0];
+  free_head = &holes[1];
+}
+
+uint32_t max_hole() {
+  uint32_t max = 0;
+  struct hole *h = hole_head;
+  while (h != NULL) {
+    if (h->size > max)
+      max = h->size;
+  }
+  return max;
+}
+
+void del_hole(struct hole *h) {
+  if (h == hole_head)
+    hole_head = h->next;
+  else
+    h->prev->next = h->next;
+
+  h->next = free_head;
+  free_head = h;
+}
+
+void merge_hole(struct hole *h) {
+  struct hole *next = NULL;
+  if ((next = h->next) == NULL)
+    return;
+  if (h->begin + h->size == next->begin) {
+    h->size += next->size;
+    del_hole(next);
+  } else {
+    h = next;
+  }
+
+  if ((next = h->next) == NULL)
+    return;
+  if (h->begin + h->size == next->begin) {
+    h->size += next->size;
+    del_hole(next);
+  }
+}
+
+uint8_t *kmalloc(uint32_t size) {
+  if (size & 1) {
+    size++; //todo align better than this
+  }
+  uint8_t *old_base;
+  struct hole *h = hole_head;
+  while (h != NULL) {
+    if (h->size >= size) {
+      // suitable hole found
+      old_base = h->begin;
+      h->begin += size;
+      h->size -= size;
+
+      if (h->size != 0)
+	return old_base;
+      del_hole(h);
+      return old_base;
+    }
+    h = h->next;
+  }
+  return NULL; // no hole found
+}
+
+void kfree(uint8_t *base, uint32_t size) {
+  if (size & 1) {
+    size++;
+  }
+  struct hole *h;
+  struct hole *new;
+  if ((new = free_head) == NULL) {
+    putstr("PANIC: hole table full\r\n");
+    return;
+  }
+
+  new->begin = base;
+  new->size = size;
+  free_head = new->next;
+  h = hole_head;
+
+  if (h == NULL || base <= h->begin) {
+    new->next = h;
+    hole_head = new;
+    new->prev = NULL;
+    //merge_hole(new);
+    return;
+  }
+
+  while (h != NULL && base > h->begin) {
+    h = h->next;
+  }
+
+  new->prev = h->prev;
+  new->next = h;
+  h->prev->next = new;
+  h->prev = new;
+  //merge_hole(new);
+}
     
 uint8_t gptbuf[512];
 uint8_t superblockbuf[1024];
+
+void print_holes() {
+  struct hole *h = hole_head;
+  while (h != NULL) {
+    putstr("Begin: ");
+    prlong((uint32_t)h->begin);
+    putstr(" End: ");
+    prlong((uint32_t)h->begin + h->size);
+    putstr("\r\n");
+    h = h->next;
+  }
+}
 
 int main() {
   read_sector(2, gptbuf);
@@ -447,6 +586,36 @@ int main() {
   for (int i = 0; gptbuf[i] != '\0'; i++)
     putch(gptbuf[i]);
   putstr("\r\n");
+
+  putstr("Start of free memory: ");
+  prlong((uint32_t)&__end);
+  putstr("\r\n");
+  init_mem();
+
+  putstr("No allocs: \r\n");
+  print_holes();
+  char *dynstr = kmalloc(7);
+  if (dynstr != NULL) {
+    dynstr[0] = 'P';
+    dynstr[1] = 'o';
+    dynstr[2] = 'o';
+    dynstr[3] = 'p';
+    dynstr[4] = '\r';
+    dynstr[5] = '\n';
+    dynstr[6] = '\0';
+    putstr(dynstr);
+  }
+  putstr("One alloc: \r\n");
+  print_holes();
+  uint8_t *dummy = kmalloc(65535);
+  putstr("Two allocs: ");
+  print_holes();
+  kfree(dynstr, 7);
+  putstr("One free: \r\n");
+  print_holes();
+  kfree(dummy, 65535);
+  putstr("Two frees: ");
+  print_holes();
   return 0;
 }
     
