@@ -250,11 +250,8 @@ struct e2fs_sblk *parse_sblk(uint8_t *buf) {
 }
 
 struct file_desc {
-  uint16_t fd_id;
   struct ino *fd_ino;
-  uint16_t fd_count;
   uint32_t fd_offs;
-  uint8_t fd_dirty;
   uint16_t fd_mode;
 };
 
@@ -455,6 +452,65 @@ struct ino *get_ino(uint32_t ino_num, struct e2fs_fsinfo *fi) {
   return f;
 }
 
+/*
+  release inode from table.
+  TODO: write back to disk if dirty when refcount == 0
+*/
+void release_ino(struct ino *i, struct e2fs_fsinfo *fi) {
+  if (i == NULL)
+    return;
+  i->refcount--;
+}
+
+/*
+  read n bytes from fd. return bytes read.
+*/
+size_t read(struct file_desc *fd, void *buf, size_t n) {
+  size_t written = 0;
+  // todo work with block cache
+  uint8_t *sec_buf = kmalloc(512);
+  if (sec_buf == NULL) {
+    putstr("Couldn't allocate buffer in read\r\n");
+    return 0;
+  }
+  
+  // fd should already be open()d and valid
+  if (fd == NULL || fd->fd_ino == NULL || fd->fd_ino->ino_num == 0)
+    return 0;
+
+  // figure out which block we need to read from
+  uint32_t cur_lba = fd->fd_offs / 512;
+
+  read_sector(cur_lba, sec_buf);
+  // check if we're in the middle of a sector and need
+  // to do a partial copy before full blocks
+  if (fd->fd_offs % 512 != 0) {
+    copymem(sec_buf + (fd->fd_offs % 512), buf, 512 - (fd->fd_offs % 512));
+    n -= fd->fd_offs % 512;
+    written += fd->fd_offs % 512;
+    cur_lba++; // on to next block
+  }
+
+  // calculate these after so the offs doesn't interfere
+  uint32_t n_blocks = n / 512;
+  uint32_t n_partial = n % 512;
+
+  for (int i = 0; i < n_blocks; i++) {
+    read_sector(cur_lba, sec_buf);
+    copymem(sec_buf, buf + written, 512);
+    written += 512;
+    cur_lba++;
+  }
+
+  if (n_partial) { // write last partial sector
+    read_sector(cur_lba, sec_buf);
+    copymem(sec_buf, buf + written, n_partial);
+    written += n_partial;
+  }
+
+  return written;
+}
+
 //replace with version that takes ino struct and loads off disk as needed
 void print_dir(uint8_t *buf) {
   uint32_t ino_num = le2be(&(buf[0]));
@@ -492,31 +548,100 @@ void print_dir(uint8_t *buf) {
   }
 }
 
-//rework to take dir's inode
-uint32_t find_name(uint8_t *buf, char *name) {
-  uint32_t ino_num = le2be(&(buf[0]));
-  uint16_t size = le2be16(&(buf[4]));
-  uint8_t name_len = buf[6];
-  uint8_t type = buf[7];
+/*
+  search for name in directory cwd. works with absolute and
+  relative paths
+  todo: any error checking at all
+*/
+struct ino *search_rel(struct ino *cwd, char *name, struct e2fs_fsinfo *fi) {
+  if (name[0] == '/')  {
+    release_ino(cwd, fi);
+    cwd = get_ino(2, fi);
+    name++; // skip leading slash
+  }
+  uint64_t dir_sz = cwd->size;
+  // todo use block cache
+  uint32_t dbptr0 = cwd->dbptr0;
+  uint8_t *sec_buf = kmalloc(512);
+  if (sec_buf == NULL) {
+    putstr("Couldn't allocate sec_buf in search_rel\r\n");
+    return NULL;
+  }
 
-  int j = 0;
-  while (j < 512) {
-    if (ino_num == 0)
-      break;
-    int i = 0;
-    for (; i < name_len; i++) {
-      if ((buf[8+i+j] != name[i]) || (name[i] == '\0'))
+  uint32_t cur_lba = BLK_LBA(dbptr0, fi->vol_start, fi->blk_sz);
+  uint32_t cwd_offs = 0;
+  uint32_t lba_offs = 0;
+  read_sector(cur_lba, sec_buf);
+
+  // look up each component in the name one by one
+  while (1) {
+    uint32_t ino_num = le2be(&(sec_buf[cwd_offs % 512]));
+    uint16_t entry_sz = le2be16(&(sec_buf[(cwd_offs % 512) + 4]));
+    uint8_t name_len = sec_buf[(cwd_offs % 512) + 6];
+    size_t name_offs = (cwd_offs % 512) + 8;
+
+    if (ino_num == 0) {
+      cwd_offs += entry_sz;
+      if (cwd_offs >= dir_sz) {
+	putstr("Search failed 1\r\n");
+	return NULL;
+      }
+      lba_offs += entry_sz;
+      if (lba_offs >= 512) { // need next block
+	cur_lba++;
+	read_sector(cur_lba, sec_buf);
+	lba_offs = 0;
+      }
+      continue;
+    }
+
+    // compare current pathname chunk to the entry
+    size_t comp_len = 0;
+    while (name[comp_len] != '/' && name[comp_len] != '\0')
+      comp_len++;
+    
+    int j = 0;
+    for (; j < name_len; j++) {
+      if ((sec_buf[name_offs + j] != name[j]) || (name[j] == '\0'))
 	break;
     }
-    if (i == name_len)
-      return ino_num;
-    j += size;
-    ino_num = le2be(&(buf[j+0]));
-    size = le2be16(&(buf[j+4]));
-    name_len = buf[j+6];
-    type = buf[j+7];
+    
+    if (j == comp_len) { // match
+      struct ino *match = get_ino(ino_num, fi);
+      if ((match->type_perm & 0xf000) != 0x4000 && name[comp_len] == '/') {
+	// wanted directory, got file
+	putstr("Search failed 2\r\n");
+	return NULL;
+      }
+      if (name[comp_len] == '\0') { // got the ultimate file we need
+	return match;
+      } else { // got one directory further
+	name += comp_len + 1;
+	release_ino(cwd, fi);
+	cwd = match;
+	dir_sz = cwd->size;
+	dbptr0 = cwd->dbptr0;
+	lba_offs = 0;
+	cwd_offs = 0;
+	cur_lba = BLK_LBA(dbptr0, fi->vol_start, fi->blk_sz);
+	read_sector(cur_lba, sec_buf);
+	continue;
+      }
+    } else { // no match, keep searching
+      cwd_offs += entry_sz;
+      lba_offs += entry_sz;
+      if (cwd_offs >= dir_sz) { // no match in whole directory
+	putstr("Search failed 3\r\n");
+	return NULL;
+      }
+      if (lba_offs >= 512) { // need next block
+	cur_lba++;
+	read_sector(cur_lba, sec_buf);
+	lba_offs = 0;
+	continue;
+      }
+    }
   }
-  return 0;
 }
 
 void sector_dump(uint32_t lba) {
@@ -591,6 +716,7 @@ int main() {
   init_mem();
   //wouldn't be necessary if i had a proper crt0
   memset(&inotab, 0, sizeof(inotab));
+  memset(&fdtab, 0, sizeof(fdtab));
   uint8_t *sec_buf = kmalloc(512);
   if (sec_buf == NULL) {
     putstr("Could not allocate sec_buf in main\r\n");
@@ -660,20 +786,10 @@ int main() {
   uint32_t root_ino = 2;
   struct ino *root = get_ino(root_ino, fi);
 
+  struct ino *elf = search_rel(root, "stinky/farty/mm.elf", fi);
   uint32_t dbptr0 = root->dbptr0;
-  read_sector(BLK_LBA(dbptr0, fi->vol_start, fi->blk_sz), sec_buf);
-  print_dir(sec_buf);
-  kfree(root, sizeof(struct ino));
-  uint32_t elf_ino = find_name(sec_buf, "mm.elf");
-  if (elf_ino == 0) {
-    putstr("Couldn't find mm.elf\r\n");
-  } else {
-    putstr("mm.elf inode number: ");
-    prlong(elf_ino);
-    putstr("\r\n");
-  }
+  release_ino(root, fi);
 
-  struct ino *elf = get_ino(elf_ino, fi);
   dbptr0 = elf->dbptr0;
   putstr("mm.elf size: ");
   prlong((uint32_t)(elf->size & 0xffffffff));
