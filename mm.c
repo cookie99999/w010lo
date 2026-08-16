@@ -59,41 +59,6 @@ struct hole holes[NHOLE];
 struct hole *hole_head;
 struct hole *free_head;
 
-void putch(char c) {
-  asm volatile ("1: btst.b #2, 0xfa1013\n"
-		"beq 1b\n"
-		"move.b %0, 0xfa1017"
-		:
-		:"r"(c)
-		:"%d0");
-}
-
-void putstr(const char * s) {
-  while (*s != '\0') {
-    putch(*s);
-    s++;
-  }
-}
-
-void prbyte(uint8_t b) {
-  uint8_t hi = (b >> 4) & 0x0f;
-  hi += 0x30;
-  if (hi > '9')
-    hi += 7;
-  putch(hi);
-  b = (b & 0x0f) + 0x30;
-  if (b > '9')
-    b += 7;
-  putch(b);
-}
-
-void prlong(uint32_t l) {
-  prbyte((uint8_t)(l >> 24));
-  prbyte((uint8_t)(l >> 16));
-  prbyte((uint8_t)(l >> 8));
-  prbyte((uint8_t)(l & 0xff));
-}
-
 void init_mem() {
   for (struct hole *h = &holes[0]; h < &holes[NHOLE]; h++) {
     h->next = h + 1;
@@ -145,7 +110,7 @@ void merge_hole(struct hole *h) {
   }
 }
 
-uint8_t *kmalloc(uint32_t size) {
+void *kmalloc(uint32_t size) {
   if (size & 1) {
     size++; //todo align better than this
   }
@@ -175,7 +140,7 @@ void kfree(uint8_t *base, uint32_t size) {
   struct hole *h;
   struct hole *new;
   if ((new = free_head) == NULL) {
-    putstr("PANIC: hole table full\r\n");
+    //putstr("PANIC: hole table full\r\n");
     return;
   }
 
@@ -206,7 +171,24 @@ void kfree(uint8_t *base, uint32_t size) {
   merge_hole(new);
 }
 
-void print_holes() {
+// to get gcc to leave me alone when copying structs off the stack
+__attribute__ ((__optimize__ ("-fno-tree-loop-distribute-patterns")))
+void *memcpy(void *dst, const void *src, size_t num) {
+  while (num--) {
+    *(uint8_t*)dst++ = *(uint8_t*)src++;
+  }
+  return dst;
+}
+
+__attribute__ ((__optimize__ ("-fno-tree-loop-distribute-patterns")))
+void *memset(void *dst, int c, size_t n) {
+  while (n--) {
+    *(unsigned char*)dst++ = (unsigned char)c;
+  }
+  return dst;
+}
+
+/*void print_holes() {
   struct hole *h = hole_head;
   while (h != NULL) {
     putstr("Begin: ");
@@ -216,9 +198,9 @@ void print_holes() {
     putstr("\r\n");
     h = h->next;
   }
-}
+  }*/
 
-int main() {
+/*int main() {
   putstr("Start of free memory: ");
   prlong((uint32_t)&__end);
   putstr("\r\n");
@@ -250,4 +232,4 @@ int main() {
   print_holes();
 
   return 0;
-}
+  }*/
