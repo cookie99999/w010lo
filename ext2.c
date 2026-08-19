@@ -84,6 +84,12 @@ uint16_t le2be16(uint8_t *le) {
   return be;
 }
 
+void copymem(uint8_t *src, uint8_t *dest, unsigned int n) {
+  while (n--) {
+    *dest++ = *src++;
+  }
+}
+
 struct ino {
   uint16_t type_perm;
   uint16_t uid;
@@ -186,12 +192,6 @@ struct e2fs_sblk {
   uint32_t orphan_inos_head;
 };
 
-void copymem(uint8_t *src, uint8_t *dest, int n) {
-  while (n--) {
-    *dest++ = *src++;
-  }
-}
-
 struct e2fs_sblk *parse_sblk(uint8_t *buf) {
   struct e2fs_sblk *s = kmalloc(sizeof(struct e2fs_sblk));
   if (s == NULL) {
@@ -253,6 +253,7 @@ struct file_desc {
   struct ino *fd_ino;
   uint32_t fd_offs;
   uint16_t fd_mode;
+  uint16_t fd_refcount;
 };
 
 struct e2fs_fsinfo {
@@ -462,10 +463,75 @@ void release_ino(struct ino *i, struct e2fs_fsinfo *fi) {
   i->refcount--;
 }
 
+int16_t get_fd() {
+  for (int i = 0; i < N_FILE; i++) {
+    if (fdtab[i].fd_refcount == 0)
+      return i;
+  }
+
+  return -1; // no free fd found
+}
+
+void release_fd(int16_t fd) {
+  fdtab[fd].fd_refcount--;
+  // todo: write file if needed
+}
+
+enum seek_directives {
+  SEEK_SET, SEEK_CUR, SEEK_END
+};
+
+struct ino *search_rel(struct ino *, char *, struct e2fs_fsinfo *);
+
+int16_t open(char *path, uint16_t mode, struct e2fs_fsinfo *fi) {
+  // would need to pass cwd if doing a kernel for real
+  struct ino *i = search_rel(get_ino(2, fi), path, fi);
+  if (i == NULL) {
+    putstr("Could not find ");
+    putstr(path);
+    putstr("\r\n");
+    return -1;
+  }
+
+  //todo: check permissions and allow writing
+  int16_t fd = get_fd();
+  fdtab[fd].fd_ino = i;
+  fdtab[fd].fd_offs = 0;
+  fdtab[fd].fd_mode = mode;
+  fdtab[fd].fd_refcount = 1;
+
+  return fd;
+}
+
+int close(int16_t fd) {
+  fdtab[fd].fd_refcount--;
+
+  return 0;
+}
+
+/*
+  seek to specified offset in fd
+*/
+uint32_t lseek(int16_t fd, size_t offset, int whence) {
+  switch (whence) {
+  case SEEK_SET:
+    fdtab[fd].fd_offs = offset;
+    break;
+  case SEEK_CUR:
+    fdtab[fd].fd_offs += offset;
+    break;
+  case SEEK_END:
+    fdtab[fd].fd_offs = fdtab[fd].fd_ino->size + offset;
+    break;
+  }
+
+  return fdtab[fd].fd_offs;
+}
+
 /*
   read n bytes from fd. return bytes read.
 */
-size_t read(struct file_desc *fd, void *buf, size_t n) {
+size_t read(int16_t fd, void *buf, size_t n, struct e2fs_fsinfo *fi) {
   size_t written = 0;
   // todo work with block cache
   uint8_t *sec_buf = kmalloc(512);
@@ -475,20 +541,27 @@ size_t read(struct file_desc *fd, void *buf, size_t n) {
   }
   
   // fd should already be open()d and valid
-  if (fd == NULL || fd->fd_ino == NULL || fd->fd_ino->ino_num == 0)
+  if (fdtab[fd].fd_refcount == 0 || fdtab[fd].fd_ino == NULL ||
+      fdtab[fd].fd_ino->ino_num == 0)
     return 0;
 
-  // figure out which block we need to read from
-  uint32_t cur_lba = fd->fd_offs / 512;
+  uint32_t cur_blk = fdtab[fd].fd_offs / fi->blk_sz;
+  cur_blk += fdtab[fd].fd_ino->dbptr0;
+  // figure out which sector we need to read from
+  uint32_t cur_lba = BLK_LBA(cur_blk, fi->vol_start, fi->blk_sz);
+  uint32_t offs_in_lba = fdtab[fd].fd_offs % 512;
 
-  read_sector(cur_lba, sec_buf);
   // check if we're in the middle of a sector and need
-  // to do a partial copy before full blocks
-  if (fd->fd_offs % 512 != 0) {
-    copymem(sec_buf + (fd->fd_offs % 512), buf, 512 - (fd->fd_offs % 512));
-    n -= fd->fd_offs % 512;
-    written += fd->fd_offs % 512;
-    cur_lba++; // on to next block
+  // to do a partial copy before full sectors
+  if (offs_in_lba != 0) {
+    read_sector(cur_lba, sec_buf);
+    uint32_t amount = 512 - offs_in_lba;
+    if (n < amount)
+      amount = n;
+    copymem(sec_buf + offs_in_lba, buf + written, amount);
+    n -= amount;
+    written += amount;
+    cur_lba++; // on to next sector
   }
 
   // calculate these after so the offs doesn't interfere
@@ -508,6 +581,7 @@ size_t read(struct file_desc *fd, void *buf, size_t n) {
     written += n_partial;
   }
 
+  fdtab[fd].fd_offs += written;
   return written;
 }
 
@@ -709,7 +783,7 @@ struct __attribute__((__packed__)) elf32_shdr {
   uint32_t info;
   uint32_t align;
   uint32_t ent_sz;
-  uint8_t pad[0x14];
+  //uint8_t pad[0x14];
 };
 
 int main() {
@@ -786,17 +860,24 @@ int main() {
   uint32_t root_ino = 2;
   struct ino *root = get_ino(root_ino, fi);
 
-  struct ino *elf = search_rel(root, "stinky/farty/mm.elf", fi);
-  uint32_t dbptr0 = root->dbptr0;
+  struct ino *elf = search_rel(root, "/mm.elf", fi);
   release_ino(root, fi);
 
-  dbptr0 = elf->dbptr0;
   putstr("mm.elf size: ");
   prlong((uint32_t)(elf->size & 0xffffffff));
   putstr("\r\n");
-  read_sector(BLK_LBA(dbptr0, fi->vol_start, fi->blk_sz), sec_buf);
   struct elf32_elfheader eh;
-  copymem(sec_buf, (uint8_t*)&eh, 52);
+  int16_t elffd = open("/mm.elf", 0, fi);
+  if (elffd < 0) {
+    putstr("Could not open mm.elf\r\n");
+    return -1;
+  }
+  size_t readed = read(elffd, (void*)&eh, 52, fi);
+  if (readed != 52) {
+    putstr("error reading\r\n");
+    return -1;
+  }
+
   if (eh.magid[0] != 0x7f || eh.magid[1] != 'E' || eh.magid[2] != 'L' || eh.magid[3] != 'F') {
     putstr("Bad ELF header or error reading file\r\n");
     return -1;
@@ -836,7 +917,7 @@ int main() {
   putstr("\r\n");
   
   struct elf32_phdr ph;
-  copymem(sec_buf+eh.phdr_offs, (uint8_t*)&ph, eh.phdr_ent_sz);
+  read(elffd, &ph, eh.phdr_ent_sz, fi);
 
   putstr("Program segment 0:\r\n");
   putstr("Segment type: ");
@@ -880,7 +961,8 @@ int main() {
     putstr("Couldn't allocate section header array\r\n");
     return -1;
   }
-  copymem(sec_buf+eh.shdr_offs, (uint8_t*)shdrs, eh.shdr_ent_sz * eh.shdr_n_ents);
+  lseek(elffd, eh.shdr_offs, SEEK_SET);
+  read(elffd, shdrs, eh.shdr_ent_sz * eh.shdr_n_ents, fi);
 
   for (int i = 0; i < eh.shdr_n_ents; i++) {
     putstr("Section ");
