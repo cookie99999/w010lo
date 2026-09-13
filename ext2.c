@@ -786,6 +786,15 @@ struct __attribute__((__packed__)) elf32_shdr {
   //uint8_t pad[0x14];
 };
 
+struct __attribute__((__packed__)) elf32_sym {
+  uint32_t name;
+  uint32_t value;
+  uint32_t size;
+  uint8_t info;
+  uint8_t other;
+  uint16_t sh_idx;
+};
+
 int main() {
   init_mem();
   //wouldn't be necessary if i had a proper crt0
@@ -964,14 +973,70 @@ int main() {
   lseek(elffd, eh.shdr_offs, SEEK_SET);
   read(elffd, shdrs, eh.shdr_ent_sz * eh.shdr_n_ents, fi);
 
+  uint8_t *strtab = kmalloc(shdrs[eh.shdr_strtab_idx].size);
+  if (strtab == NULL) {
+    putstr("Couldn't allocate string table\r\n");
+    return -1;
+  }
+
+  lseek(elffd, shdrs[eh.shdr_strtab_idx].offs, SEEK_SET);
+  read(elffd, strtab, shdrs[eh.shdr_strtab_idx].size, fi);
+
+  int symtab_idx = 0;
+  int strtab_idx = 0;
   for (int i = 0; i < eh.shdr_n_ents; i++) {
     putstr("Section ");
-    prlong((uint32_t)i);
+    putstr((char*)&(strtab[shdrs[i].name_idx]));
     putstr(":\r\n");
     putstr("Type: ");
-    prlong(shdrs[i].sec_type);
+    putstr(elf32_stype_names[shdrs[i].sec_type]);
+    if (shdrs[i].sec_type == SHT_SYMTAB)
+      symtab_idx = i;
+    if (shdrs[i].sec_type == SHT_STRTAB && i != eh.shdr_strtab_idx)
+      strtab_idx = i;
     putstr("\r\n");
+    putstr("Address: ");
+    prlong(shdrs[i].addr);
+    putstr("\r\n");
+    putstr("Offset: ");
+    prlong(shdrs[i].offs);
+    putstr("\r\n");
+    putstr("Size: ");
+    prlong(shdrs[i].size);
+    putstr("\r\n\r\n");
   }
+
+  putstr("symtab index ");
+  prlong(symtab_idx);
+  putstr("strtab index ");
+  prlong(strtab_idx);
+  putstr("\r\n");
+  
+  struct elf32_sym *symtab = kmalloc(shdrs[symtab_idx].size);
+  if (symtab == NULL) {
+    putstr("Couldn't allocate symbol table\r\n");
+    return -1;
+  }
+
+  lseek(elffd, shdrs[symtab_idx].offs, SEEK_SET);
+  read(elffd, symtab, shdrs[symtab_idx].size, fi);
+
+  struct elf32_sym *symstrtab = kmalloc(shdrs[strtab_idx].size);
+  if (symstrtab == NULL) {
+    putstr("Couldn't allocate symbol string table\r\n");
+    return -1;
+  }
+
+  lseek(elffd, shdrs[strtab_idx].offs, SEEK_SET);
+  read(elffd, symstrtab, shdrs[strtab_idx].size, fi);
+
+  for (int i = 0; i < shdrs[symtab_idx].size / sizeof(struct elf32_sym); i++) {
+    putstr("Symbol ");
+    putstr((char*)&(symstrtab[symtab[i].name]));
+    putstr(":\r\n");
+  }
+
+  hexdump((uint8_t*)symtab, shdrs[symtab_idx].size);
   
   return 0;
 }
