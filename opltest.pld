@@ -1,0 +1,24 @@
+Name       opltest.pld;
+Partno     ;
+Date       ;
+Revision   ;
+Designer   ;
+Company    ;
+Assembly   ;
+Location   ;
+Device     G16V8;
+
+Pin 1 = RW;
+Pin 2 = IO;
+Pin 3 = LDS;
+Pin 4 = A13;
+Pin 5 = A12;
+
+Pin 19 = DTACK;
+Pin 18 = RD;
+Pin 17 = WR;
+Pin 16 = CS;
+
+!DTACK = !RD # !WR;
+!RD = RW & !IO & A13 & A12 & !LDS;
+!WR = !RW & !IO & A13 & A12 & !LDS;
