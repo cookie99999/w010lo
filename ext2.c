@@ -795,6 +795,18 @@ struct __attribute__((__packed__)) elf32_sym {
   uint16_t sh_idx;
 };
 
+struct __attribute__((__packed__)) elf32_rela {
+  uint32_t r_offset;
+  uint32_t r_info;
+  int32_t r_addend;
+};
+
+struct elf32_relatab {
+  uint32_t shdr_idx;
+  uint32_t size;
+  struct elf32_rela *data;
+};
+
 int main() {
   init_mem();
   //wouldn't be necessary if i had a proper crt0
@@ -982,8 +994,10 @@ int main() {
   lseek(elffd, shdrs[eh.shdr_strtab_idx].offs, SEEK_SET);
   read(elffd, strtab, shdrs[eh.shdr_strtab_idx].size, fi);
 
-  int symtab_idx = 0;
-  int strtab_idx = 0;
+  struct elf32_relatab reltabs[16];
+  size_t nrela = 0;
+  size_t symtab_idx = 0;
+  size_t strtab_idx = 0;
   for (int i = 0; i < eh.shdr_n_ents; i++) {
     putstr("Section ");
     putstr((char*)&(strtab[shdrs[i].name_idx]));
@@ -994,6 +1008,13 @@ int main() {
       symtab_idx = i;
     if (shdrs[i].sec_type == SHT_STRTAB && i != eh.shdr_strtab_idx)
       strtab_idx = i;
+    if (shdrs[i].sec_type == SHT_RELA) {
+      lseek(elffd, shdrs[i].offs, SEEK_SET);
+      reltabs[nrela].data = kmalloc(shdrs[i].size);
+      reltabs[nrela].shdr_idx = i;
+      reltabs[nrela].size = shdrs[i].size;
+      read(elffd, reltabs[nrela++].data, shdrs[i].size, fi);
+    }
     putstr("\r\n");
     putstr("Address: ");
     prlong(shdrs[i].addr);
@@ -1039,6 +1060,19 @@ int main() {
     putstr("\r\nSection header index: ");
     prword(symtab[i].sh_idx);
     putstr("\r\n\r\n");
+  }
+
+  for (int i = 0; i < nrela; i++) {
+    putstr("RELA section:\r\n\r\n");
+    for (int j = 0; j < reltabs[i].size / sizeof(struct elf32_rela); j++) {
+      putstr("Addr: ");
+      prlong(reltabs[i].data[j].r_offset);
+      putstr("\r\nInfo: ");
+      prlong(reltabs[i].data[j].r_info);
+      putstr("\r\nAddend: ");
+      prlong(reltabs[i].data[j].r_addend);
+      putstr("\r\n\r\n");
+    }
   }
   
   return 0;
