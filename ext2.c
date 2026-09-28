@@ -545,11 +545,11 @@ size_t read(int16_t fd, void *buf, size_t n, struct e2fs_fsinfo *fi) {
       fdtab[fd].fd_ino->ino_num == 0)
     return 0;
 
-  uint32_t cur_blk = fdtab[fd].fd_offs / fi->blk_sz;
-  cur_blk += fdtab[fd].fd_ino->dbptr0;
   // figure out which sector we need to read from
-  uint32_t cur_lba = BLK_LBA(cur_blk, fi->vol_start, fi->blk_sz);
   uint32_t offs_in_lba = fdtab[fd].fd_offs % 512;
+  uint32_t cur_lba = BLK_LBA(fdtab[fd].fd_ino->dbptr0,
+			     fi->vol_start, fi->blk_sz);
+  cur_lba += fdtab[fd].fd_offs / 512;
 
   // check if we're in the middle of a sector and need
   // to do a partial copy before full sectors
@@ -1005,12 +1005,6 @@ int main() {
     prlong(shdrs[i].size);
     putstr("\r\n\r\n");
   }
-
-  putstr("symtab index ");
-  prlong(symtab_idx);
-  putstr("strtab index ");
-  prlong(strtab_idx);
-  putstr("\r\n");
   
   struct elf32_sym *symtab = kmalloc(shdrs[symtab_idx].size);
   if (symtab == NULL) {
@@ -1032,11 +1026,20 @@ int main() {
 
   for (int i = 0; i < shdrs[symtab_idx].size / sizeof(struct elf32_sym); i++) {
     putstr("Symbol ");
-    putstr((char*)&(symstrtab[symtab[i].name]));
+    putstr((char*)symstrtab+symtab[i].name);
     putstr(":\r\n");
+    putstr("Value: ");
+    prlong(symtab[i].value);
+    putstr("\r\nSize: ");
+    prlong(symtab[i].size);
+    putstr("\r\nInfo: ");
+    prbyte(symtab[i].info);
+    putstr("\r\nOther: ");
+    prbyte(symtab[i].other);
+    putstr("\r\nSection header index: ");
+    prword(symtab[i].sh_idx);
+    putstr("\r\n\r\n");
   }
-
-  hexdump((uint8_t*)symtab, shdrs[symtab_idx].size);
   
   return 0;
 }
