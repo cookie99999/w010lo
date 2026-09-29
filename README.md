@@ -2,19 +2,19 @@
 
 ### Current specs:
 
-- 12MHz 68010
+- 16MHz 68010
 - 1MB RAM
 - 256K flash
 - 68681 DUART
 - A simple monitor ported from my 65816 computer, with XMODEM download support
-- PATA interface (only tested with IDE->CF adapter so far)
+- PATA interface (tested with several CF cards and a real IDE HDD)
 
 ### Todo:
 
-- PCB version
-- Add the decoupling caps I left out due to laziness
+- New PCB revision with some bodge fixes and some SMD parts to fit more memory
 - Real-time clock
 - Audio+video board
+- PS/2 mouse + keyboard controller
 - Consider networking (SLIP or ethernet controller)
 
 ### Toolchain notes
