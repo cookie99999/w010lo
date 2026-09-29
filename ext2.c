@@ -1074,7 +1074,45 @@ int main() {
       putstr("\r\n\r\n");
     }
   }
-  
+
+  uint8_t *image_start = kmalloc(ph.p_memsz);
+  if (image_start == NULL) {
+    putstr("Could not allocate process space\r\n");
+    return -1;
+  }
+  uint32_t offs = (uint32_t)image_start - ph.p_offset;
+
+  lseek(elffd, ph.p_offset, SEEK_SET);
+  read(elffd, image_start, ph.p_filesz, fi);
+
+  for (int i = 0; i < eh.shdr_n_ents; i++) {
+    if (shdrs[i].sec_type == SHT_NOBITS) {
+      for (uint32_t j = shdrs[i].offs; j < shdrs[i].offs + shdrs[i].size; j++) {
+	image_start[j] = 0;
+      }
+    }
+  }
+
+  for (int i = 0; i < nrela; i++) {
+    for (int j = 0; j < reltabs[i].size / sizeof(struct elf32_rela); j++) {
+      uint32_t newoffs = reltabs[i].data[j].r_offset / 4;
+      uint32_t tmp = (uint32_t)image_start[reltabs[i].data[j].r_offset]
+	<< 24;
+      tmp |= (uint32_t)image_start[reltabs[i].data[j].r_offset+1] << 16;
+      tmp |= (uint32_t)image_start[reltabs[i].data[j].r_offset+2] << 8;
+      tmp |= (uint32_t)image_start[reltabs[i].data[j].r_offset+3];
+      putstr("old ");
+      prlong(tmp);
+      tmp += offs;
+      putstr(" new ");
+      prlong(tmp);
+      putstr("\r\n");
+      image_start[reltabs[i].data[j].r_offset] = (uint8_t)(tmp >> 24);
+      image_start[reltabs[i].data[j].r_offset+1] = (uint8_t)(tmp >> 16);
+      image_start[reltabs[i].data[j].r_offset+2] = (uint8_t)(tmp >> 8);
+      image_start[reltabs[i].data[j].r_offset+3] = (uint8_t)tmp;
+    }
+  }
   return 0;
 }
     
