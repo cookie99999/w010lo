@@ -7861,7 +7861,7 @@
 			(embedded_fonts no)
 		)
 	)
-	(text "Note: BERR watchdog still doesn't\nwork for some reason"
+	(text "Note: using an 05 to invert AS\nbecause I had spare gates and\ndidn't want to add a whole\n04"
 		(exclude_from_sim no)
 		(at 260.604 94.742 0)
 		(effects
@@ -7906,12 +7906,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "39d4d847-eda4-4676-b48e-a206b1178f49")
-	)
-	(junction
-		(at 237.49 154.94)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "57aaa16d-78be-46ad-bb46-9c2cc68f0e24")
 	)
 	(junction
 		(at 190.5 38.1)
@@ -8028,10 +8022,6 @@
 		(uuid "2703da96-7b5b-41ac-a39c-6a2ba064adbb")
 	)
 	(no_connect
-		(at 168.91 99.06)
-		(uuid "2b873793-7709-4159-813e-1577054f6edf")
-	)
-	(no_connect
 		(at 156.21 55.88)
 		(uuid "306b8974-7b6c-4138-8b8a-4afea792e21f")
 	)
@@ -8044,8 +8034,8 @@
 		(uuid "4140ac9f-4764-4547-837e-429851cab160")
 	)
 	(no_connect
-		(at 168.91 83.82)
-		(uuid "42df6bf9-d19a-4dcf-b856-bcdff0df2924")
+		(at 68.58 191.77)
+		(uuid "4d88575c-dd2b-49e6-831b-782adf8ad685")
 	)
 	(no_connect
 		(at 76.2 78.74)
@@ -8096,10 +8086,6 @@
 		(uuid "7f06981b-c31b-4f0b-a35e-2b064076409c")
 	)
 	(no_connect
-		(at 67.31 191.77)
-		(uuid "80c320f3-7cde-42f2-b507-7b37698e395d")
-	)
-	(no_connect
 		(at 76.2 43.18)
 		(uuid "854cd11a-13d5-4362-b808-1896f6718ae5")
 	)
@@ -8118,6 +8104,10 @@
 	(no_connect
 		(at 168.91 91.44)
 		(uuid "94ca3c8d-e998-4789-a7aa-6785f7b3b5ed")
+	)
+	(no_connect
+		(at 168.91 83.82)
+		(uuid "9b319ada-708a-4367-b7d1-016ca7a9eae5")
 	)
 	(no_connect
 		(at 274.32 144.78)
@@ -8168,6 +8158,10 @@
 		(uuid "e14ed3fb-5fb5-4c07-8979-03d33d768b0c")
 	)
 	(no_connect
+		(at 83.82 191.77)
+		(uuid "e21ba278-f313-4c9c-a174-a38fcfd84efd")
+	)
+	(no_connect
 		(at 274.32 139.7)
 		(uuid "e329985c-6163-4630-b42f-a0f2cbeae897")
 	)
@@ -8178,10 +8172,6 @@
 	(no_connect
 		(at 168.91 96.52)
 		(uuid "e5a1abcf-217a-454e-aa54-90b34310266a")
-	)
-	(no_connect
-		(at 82.55 191.77)
-		(uuid "ed998af9-dfab-4cae-b55c-4b16d9a5fbf7")
 	)
 	(no_connect
 		(at 76.2 58.42)
@@ -9000,6 +8990,16 @@
 	)
 	(wire
 		(pts
+			(xy 238.76 154.94) (xy 238.76 132.08)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1125f1b6-aa8d-4d2d-87df-646631399f75")
+	)
+	(wire
+		(pts
 			(xy 261.62 109.22) (xy 261.62 124.46)
 		)
 		(stroke
@@ -9207,16 +9207,6 @@
 			(type default)
 		)
 		(uuid "2bdf2560-e7fc-4d52-9bcd-2dab0177d57a")
-	)
-	(wire
-		(pts
-			(xy 248.92 132.08) (xy 237.49 132.08)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2d1a292e-002b-42d0-be30-8b22529a6935")
 	)
 	(wire
 		(pts
@@ -9740,16 +9730,6 @@
 	)
 	(wire
 		(pts
-			(xy 236.22 154.94) (xy 237.49 154.94)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "748a85e5-6eef-4853-8533-914aa6a5fa7e")
-	)
-	(wire
-		(pts
 			(xy 158.75 144.78) (xy 156.21 144.78)
 		)
 		(stroke
@@ -10230,6 +10210,16 @@
 	)
 	(wire
 		(pts
+			(xy 238.76 132.08) (xy 248.92 132.08)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a0d8700f-af74-49f7-8595-f24571fce11f")
+	)
+	(wire
+		(pts
 			(xy 96.52 166.37) (xy 96.52 167.64)
 		)
 		(stroke
@@ -10247,6 +10237,16 @@
 			(type default)
 		)
 		(uuid "a260aab3-87d1-49a7-af80-2bc00b5554cd")
+	)
+	(wire
+		(pts
+			(xy 248.92 154.94) (xy 238.76 154.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a2f0d6dd-2a99-4e6b-baf7-42cd2b521969")
 	)
 	(wire
 		(pts
@@ -10357,16 +10357,6 @@
 			(type default)
 		)
 		(uuid "a97522b4-5ab2-404e-bff5-ab348c265847")
-	)
-	(wire
-		(pts
-			(xy 237.49 154.94) (xy 248.92 154.94)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ab23cd87-9164-4732-8a44-1be4073a4d20")
 	)
 	(bus
 		(pts
@@ -10727,16 +10717,6 @@
 			(type default)
 		)
 		(uuid "d1ca485e-9b5e-4cea-a68a-a0014b3ff5d6")
-	)
-	(wire
-		(pts
-			(xy 237.49 132.08) (xy 237.49 154.94)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d4e48710-a4aa-4e38-bbd8-2cb269efd4ca")
 	)
 	(wire
 		(pts
@@ -12582,30 +12562,6 @@
 			)
 		)
 	)
-	(global_label "~{HALT}"
-		(shape bidirectional)
-		(at 245.11 24.13 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "47e2dbb1-9570-4f9b-bceb-a5e5e7462d81")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 253.6213 24.13 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-	)
 	(global_label "~{VPA}"
 		(shape input)
 		(at 186.69 99.06 180)
@@ -12750,6 +12706,30 @@
 			)
 		)
 	)
+	(global_label "nAS"
+		(shape output)
+		(at 168.91 99.06 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "529957a7-9b56-42cd-8a48-c0fb02ff7678")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 175.3423 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
 	(global_label "~{IPL1}"
 		(shape output)
 		(at 162.56 140.97 0)
@@ -12811,30 +12791,6 @@
 		(uuid "5778cc17-fa32-49c3-849f-04d4eecc95bc")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 262.89 34.2514 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
-	(global_label "~{AS}"
-		(shape input)
-		(at 236.22 154.94 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "5905a127-859a-43cd-a4e2-8e9a020ae537")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 230.9367 154.94 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12987,30 +12943,6 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
-			)
-		)
-	)
-	(global_label "~{RESET}"
-		(shape bidirectional)
-		(at 245.11 39.37 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "6f28f5ae-6d8f-4d15-b5dd-692d82c12084")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 254.9516 39.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
 			)
 		)
 	)
@@ -13267,6 +13199,30 @@
 		(uuid "9543aec9-3f35-4e86-9d61-25c254413807")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 180.1367 119.38 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "nAS"
+		(shape input)
+		(at 238.76 154.94 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "9ea36e96-c3bb-41e1-8ebd-bd83a689cfd7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 232.3277 154.94 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13614,6 +13570,30 @@
 			)
 		)
 	)
+	(global_label "~{RESET}"
+		(shape bidirectional)
+		(at 245.11 24.13 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "ce704f5d-9324-4bed-90ce-00928436684f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 254.9516 24.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
 	(global_label "~{IPL0}"
 		(shape output)
 		(at 168.91 137.16 0)
@@ -13707,6 +13687,30 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
+			)
+		)
+	)
+	(global_label "~{HALT}"
+		(shape bidirectional)
+		(at 245.11 39.37 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d97627d2-2255-4cf8-8cd3-ee8773604585")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 253.6213 39.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
 		)
 	)
@@ -14196,7 +14200,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Package_DIP:DIP-16_W7.62mm_Socket"
+		(property "Footprint" "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm"
 			(at 135.89 139.7 0)
 			(hide yes)
 			(show_name no)
@@ -14318,7 +14322,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DIP:DIP-8_W7.62mm_Socket"
+		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
 			(at 176.53 24.13 0)
 			(hide yes)
 			(show_name no)
@@ -14657,7 +14661,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_DIP:DIP-16_W7.62mm_Socket"
+		(property "Footprint" "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm"
 			(at 261.62 142.24 0)
 			(hide yes)
 			(show_name no)
@@ -15382,7 +15386,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket"
+		(property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
 			(at 222.25 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -15999,7 +16003,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 104.14 165.4048 0)
 			(hide yes)
 			(show_name no)
@@ -16316,7 +16320,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket"
+		(property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
 			(at 58.42 191.77 0)
 			(hide yes)
 			(show_name no)
@@ -16434,7 +16438,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 233.172 35.56 90)
 			(hide yes)
 			(show_name no)
@@ -16833,7 +16837,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket"
+		(property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
 			(at 96.52 180.34 0)
 			(hide yes)
 			(show_name no)
@@ -17028,7 +17032,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 143.51 119.6848 0)
 			(hide yes)
 			(show_name no)
@@ -17189,7 +17193,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 233.172 20.32 90)
 			(hide yes)
 			(show_name no)
@@ -17745,7 +17749,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket"
+		(property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
 			(at 222.25 24.13 0)
 			(hide yes)
 			(show_name no)
@@ -17851,7 +17855,7 @@
 				)
 			)
 		)
-		(property "Value" "12MHz"
+		(property "Value" "16MHz"
 			(at 173.99 51.9998 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18183,7 +18187,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 247.65 49.8348 0)
 			(hide yes)
 			(show_name no)
@@ -18343,7 +18347,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 151.13 73.9648 0)
 			(hide yes)
 			(show_name no)
@@ -18651,7 +18655,7 @@
 	)
 	(symbol
 		(lib_id "74xx:74LS05")
-		(at 74.93 191.77 0)
+		(at 76.2 191.77 0)
 		(unit 6)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -18662,7 +18666,7 @@
 		(fields_autoplaced yes)
 		(uuid "aed68597-0f4c-41f1-93c8-d25e13557dcb")
 		(property "Reference" "U2"
-			(at 74.93 182.88 0)
+			(at 76.2 182.88 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -18672,7 +18676,7 @@
 			)
 		)
 		(property "Value" "74LS05"
-			(at 74.93 185.42 0)
+			(at 76.2 185.42 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -18681,8 +18685,8 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket"
-			(at 74.93 191.77 0)
+		(property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
+			(at 76.2 191.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18693,7 +18697,7 @@
 			)
 		)
 		(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS05"
-			(at 74.93 191.77 0)
+			(at 76.2 191.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18704,7 +18708,7 @@
 			)
 		)
 		(property "Description" "Inverter Open Collect"
-			(at 74.93 191.77 0)
+			(at 76.2 191.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -19161,7 +19165,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket"
+		(property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
 			(at 22.86 191.77 0)
 			(hide yes)
 			(show_name no)
@@ -19514,7 +19518,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 157.48 19.3548 0)
 			(hide yes)
 			(show_name no)
@@ -20068,7 +20072,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket"
+		(property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
 			(at 40.64 191.77 0)
 			(hide yes)
 			(show_name no)
@@ -20184,7 +20188,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 269.24 108.2548 0)
 			(hide yes)
 			(show_name no)

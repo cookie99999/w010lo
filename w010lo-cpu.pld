@@ -15,5 +15,7 @@ Pin 4 = AS;
 Pin 5 = A23;
 
 Pin 12 = IACK;
+Pin 19 = nAS;
 
 !IACK = (FC0 & FC1 & FC2) & !AS & A23;
+nAS = !AS;
