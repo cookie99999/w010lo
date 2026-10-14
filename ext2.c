@@ -8,7 +8,7 @@
 #define BLK_LBA(x, y, z) (y + ((x * z) / 512)) // lba of blknum x w/ partition start y and block size z
 
 extern void *kmalloc(uint32_t size);
-extern void kfree(void *base, uint32_t size);
+extern void kfree(void *base);
 extern void init_mem();
 extern void *memset(void*, int, size_t);
 void sector_dump(uint32_t);
@@ -336,7 +336,7 @@ struct e2fs_fsinfo *init_fsinfo() {
     fi->bgdt[j+(n_whole_secs*16)] = parse_bgd(sec_buf+(32*j));
   }
 
-  kfree(sec_buf, 1024);
+  kfree(sec_buf);
   return fi;
 }
 
@@ -418,8 +418,7 @@ int read_ino(struct ino *i, struct e2fs_fsinfo *fi) {
   byteswap_ino(i, sec_buf + offs);
   i->refcount = 0;
   i->dirty = 0;
-  
-  kfree(sec_buf, 512);
+  kfree(sec_buf);
   return 0;
 }
 
@@ -646,7 +645,7 @@ struct ino *search_rel(struct ino *cwd, char *name, struct e2fs_fsinfo *fi) {
   uint32_t cwd_offs = 0;
   uint32_t lba_offs = 0;
   read_sector(cur_lba, sec_buf);
-
+  
   // look up each component in the name one by one
   while (1) {
     uint32_t ino_num = le2be(&(sec_buf[cwd_offs % 512]));
@@ -726,7 +725,7 @@ void sector_dump(uint32_t lba) {
   }
   read_sector(lba, buf);
   hexdump(buf, 512);
-  kfree(buf, 512);
+  kfree(buf);
 }
 
 void init_fdtab() {
@@ -1095,7 +1094,6 @@ int main() {
 
   for (int i = 0; i < nrela; i++) {
     for (int j = 0; j < reltabs[i].size / sizeof(struct elf32_rela); j++) {
-      uint32_t newoffs = reltabs[i].data[j].r_offset / 4;
       uint32_t tmp = (uint32_t)image_start[reltabs[i].data[j].r_offset]
 	<< 24;
       tmp |= (uint32_t)image_start[reltabs[i].data[j].r_offset+1] << 16;

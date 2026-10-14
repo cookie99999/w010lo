@@ -111,6 +111,8 @@ void merge_hole(struct hole *h) {
 }
 
 void *kmalloc(uint32_t size) {
+  // embed size in the region so you don't have to pass it to free
+  size += 4;
   if (size & 1) {
     size++; //todo align better than this
   }
@@ -122,6 +124,8 @@ void *kmalloc(uint32_t size) {
       old_base = h->begin;
       h->begin += size;
       h->size -= size;
+      *((uint32_t*)old_base) = size;
+      old_base += 4;
 
       if (h->size != 0)
 	return old_base;
@@ -133,10 +137,9 @@ void *kmalloc(uint32_t size) {
   return NULL; // no hole found
 }
 
-void kfree(uint8_t *base, uint32_t size) {
-  if (size & 1) {
-    size++;
-  }
+void kfree(uint8_t *base) {
+  base -= 4; // push back to also free the size tag
+  uint32_t size = *((uint32_t*)base);
   struct hole *h;
   struct hole *new;
   if ((new = free_head) == NULL) {
