@@ -1,7 +1,4 @@
   align 2
-  ; ram 00000000-000fffff
-  ; duart 00100000-007fffff
-  ; rom 00800000-ffffffff
 
 DUART_BASE equ $00fa1001
 DUART_MR1A equ DUART_BASE
@@ -62,7 +59,7 @@ vectors:
   dc.l generic_trap ; line 1111
   dc.l reserved_trap ; res
   dc.l reserved_trap ; res
-  dc.l reserved_trap ; format error (68010)
+  dc.l generic_trap ; format error (68010)
   dc.l uninit_vec_trap ; uninitialized vector
   dc.l reserved_trap ; res
   dc.l reserved_trap ; res
@@ -563,30 +560,47 @@ generic_trap:
   rte
 
 berr_trap:
-  movem.l a0/d0, -(sp)
+  ; 0-1 sr 2-5 pc 6-7 fmt+vec 8-9 spc status word
+  ; 10-13 fault addr
   lea str_exception, a0
   jsr puts
   lea str_exc_berr, a0
   jsr puts
-  movem.l (sp)+, a0/d0
-  rte
+  move.l 10(sp), d0
+  jsr prlong
+  move.b #CR, d0
+  jsr putchar
+  move.b #LF, d0
+  jsr putchar
+.die:
+  bra .die
 
 addr_trap:
-  movem.l a0/d0, -(sp)
+  ; 0-1 sr 2-5 pc 6-7 fmt+vec 8-9 spc status word
+  ; 10-13 fault addr
   lea str_exception, a0
   jsr puts
   lea str_exc_addr, a0
   jsr puts
-  movem.l (sp)+, a0/d0
-  rte
+  move.l 10(sp), d0
+  jsr prlong
+  move.b #CR, d0
+  jsr putchar
+  move.b #LF, d0
+  jsr putchar
+.die:
+  bra .die
 
 illegal_instr_trap:
-  movem.l a0/d0/d1, -(sp)
+  ; 0-1 sr 2-5 pc 6-7 fmt+vec
+  ; i'm not sure if the prefetch interferes
+  ; with getting the exact faulting instruction,
+  ; or if stacked pc is valid unlike berr/address exc
   lea str_exception, a0
   jsr puts
   lea str_exc_ill, a0
   jsr puts
-  move.l 14(sp), d0
+  move.l 2(sp), d0
   movea.l d0, a0
   move.l (a0), d1
   jsr prlong
@@ -596,8 +610,8 @@ illegal_instr_trap:
   jsr putchar
   exg d0, d1
   jsr prlong
-  movem.l (sp)+, a0/d0/d1
-  rte
+.die:
+  bra .die
 
 uninit_vec_trap:
   movem.l a0/d0, -(sp)
@@ -706,11 +720,11 @@ str_err_xmodem:
 str_err_bad_input:
   dc.b "ERR: Bad input", CR, LF, $00
 str_exception:
-  dc.b "******** EXCEPTION ********", CR, LF, $00
+  dc.b CR, LF, "******** EXCEPTION ********", CR, LF, $00
 str_exc_berr:
-  dc.b "Bus error", CR, LF, $00
+  dc.b "Bus error: ", $00
 str_exc_addr:
-  dc.b "Unaligned address", CR, LF, $00
+  dc.b "Unaligned address: ", $00
 str_exc_div:
   dc.b "Divide by zero", CR, LF, $00
 str_exc_chk:
