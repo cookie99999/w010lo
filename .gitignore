@@ -3,6 +3,7 @@
 *.elf
 *.lst
 *~
+pico/build
 
 # kicad stuff
 *backups
