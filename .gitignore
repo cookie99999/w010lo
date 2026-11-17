@@ -3,7 +3,7 @@
 *.elf
 *.lst
 *~
-pico/build
+pico/vga-controller/build
 
 # kicad stuff
 *backups
