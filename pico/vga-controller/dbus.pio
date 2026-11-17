@@ -1,0 +1,45 @@
+.program dbus
+.define public RWB 0
+.define public CSB 1
+.define public DS 26
+.define public DTACK 27
+.side_set 1 opt
+.wrap_target
+start:
+  wait 1 gpio CSB ; CSB deasserted from last access
+  wait 0 gpio CSB ; csb asserted
+  jmp pin start ; only respond to writes
+write:
+  wait 0 gpio DS ; ds asserted
+  in pins 8
+  wait 1 gpio DS side 0
+  irq wait 0 side 1
+.wrap
+
+% c-sdk {
+static inline void dbus_program_init(PIO pio, uint sm, uint offset, uint pin) {
+  pio_sm_config c = dbus_program_get_default_config(offset);
+  //sm_config_set_set_pins(&c, pin, 8);
+  sm_config_set_in_pins(&c, pin);
+  pio_sm_set_consecutive_pindirs(pio, sm, pin, 8, false); //dbus pins input
+  pio_sm_set_consecutive_pindirs(pio, sm, 1, 1, false);
+  pio_sm_set_consecutive_pindirs(pio, sm, 26, 1, false);
+  pio_sm_set_consecutive_pindirs(pio, sm, 27, 1, true);
+  pio_gpio_init(pio, pin);
+  pio_gpio_init(pio, pin + 1);
+  pio_gpio_init(pio, pin + 2);
+  pio_gpio_init(pio, pin + 3);
+  pio_gpio_init(pio, pin + 4);
+  pio_gpio_init(pio, pin + 5);
+  pio_gpio_init(pio, pin + 6);
+  pio_gpio_init(pio, pin + 7);
+  pio_gpio_init(pio, 1);
+  pio_gpio_init(pio, 26);
+  pio_gpio_init(pio, 27);
+  sm_config_set_sideset_pins(&c, 27);
+  sm_config_set_jmp_pin(&c, 0);
+  sm_config_set_in_shift(&c, true, true, 8); //autopush to right at 8 bits
+  sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+  pio_sm_init(pio, sm, offset, &c);
+}
+%}

@@ -1,0 +1,18 @@
+Name       picotest.pld;
+Partno     ;
+Date       ;
+Revision   ;
+Designer   ;
+Company    ;
+Assembly   ;
+Location   ;
+Device     P22V10;
+
+Pin 1 = A12;
+Pin 2 = A13;
+Pin 3 = IO;
+Pin 4 = AS;
+
+Pin 23 = CS;
+
+!CS = A12 & A13 & !IO & !AS;
